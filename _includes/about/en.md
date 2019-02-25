@@ -13,14 +13,12 @@
 - Information System Project Manager
 
 
-##### Talks
+##### Links
 
 
-- [My CSDN blog][1]
-- [MY SINA BLOG][2]
+- [MY CSDN BLOG](https://blog.csdn.net/u014186673)
+- [MY SINA BLOG](http://blog.sina.com.cn/foremol)
 
-[1]: https://blog.csdn.net/u014186673
-[2]: http://blog.sina.com.cn/foremol
 
 
 
