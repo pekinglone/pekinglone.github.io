@@ -28,7 +28,7 @@ tags:
 　　针对Rancher-server所在的服务器的docker-ce版本进行了升级，从17.03升级到了18.06，升级之后Rancher-server的容器启动也正常，但是在Rancher-server的管理台页面看到所管理的myk8s集群无法连接了，一直处于“Provisioning”状态，下方提示等待agent连接，无法通过Rancher server的web页面管理myk8s集群。  
 ![2019-02-01-09-45-36](http://img.zzl.yuandingsoft.com/blog/2019-02-01-09-45-36.png)  
 　　查询Rancher-server容器的日志，发现有大量的提示TLS握手错误，原因是认证证书有问题，导致Rancher-server和Rancher-agent进行通讯，因此Rancher-server无法通过安装在k8s集群中的Rancher-agent对k8s集群进行管理了。  
-``` javascript  
+``` bash  
 2019/01/23 10:00:49 [INFO] 2019/01/23 10:00:49 http: TLS handshake error from 192.168.51.201:56744: remote error: tls: bad certificate  
 2019/01/23 10:00:59 [INFO] 2019/01/23 10:00:59 http: TLS handshake error from 192.168.51.200:52786: remote error: tls: bad certificate  
 2019/01/23 10:00:59 [INFO] 2019/01/23 10:00:59 http: TLS handshake error from 192.168.51.202:43754: remote error: tls: bad certificate  
@@ -55,13 +55,13 @@ tags:
 　　[https://gist.github.com/superseb/d59f26102f0a8671672f8035811b2184](https://gist.github.com/superseb/d59f26102f0a8671672f8035811b2184)  
 ### 1.2获取生成kubeconfig的脚本  
 使用如下命令下载，下载得到get_kubeconfig_custom_cluster_rancher2.sh脚本。  
-``` javascript  
+``` bash  
 wget https://gist.githubusercontent.com/superseb/f6cd637a7ad556124132ca39961789a4/raw/c2bb60a51fa4dafef2964589ce0bc9d923653aa1/get_kubeconfig_custom_cluster_rancher2.sh  
 ```  
 ### 1.3安装jq命令  
 　　如果系统中没有jq命令，则可通过如下方式安装。  
 　　通常系统自带的repo仓库中没有jq相关的rpm包，直接从jq官方下载的源码包也无法正常编译通过，因此可以添加包含jq软件的repo仓库，之后通过yum方式直接安装。安装方式如下：  
-``` javascript  
+``` bash  
 # 下载包含jq的repo仓库源，其实就是epel的yum源  
 wget http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm  
 # 安装repo仓库  
@@ -76,19 +76,19 @@ yum install jq
 　　登录运行rancher-server的主机，上传相关的脚本，我的环境是单节点运行rancher-server的，因此我使用的脚本是get_agents_yaml_single.sh。我的k8s集群的名称是“myk8s”。  
 　　脚本的使用语法是：./get_agents_yaml_single.sh _k8s-cluster-name_  
 　　执行脚本，将会自动生成myk8s集群对应的agent资源配置文件，我这里生成的文件是“**rancher-agents-myk8s.yml**”。  
-``` javascript  
+``` bash  
 ./get_agents_yaml_single.sh myk8s  
 ```  
 ## 3.获取原k8s集群的kubeconfig  
 　　登录运行rancher-server的主机，上传相关的脚本get_kubeconfig_custom_cluster_rancher2.sh。  
 　　脚本的使用语法是：./get_kubeconfig_custom_cluster_rancher2.sh _k8s-cluster-name_  
 　　执行脚本，将会自动生成myk8s集群对应的kubeconfig配置文件，我这里生成的文件是“**kubeconfig**”。  
-``` javascript  
+``` bash  
 ./get_kubeconfig_custom_cluster_rancher2.sh myk8s  
 ```  
 ## 4.重新部署agent  
 　　执行kubectl命令部署相关的agent资源，之后在rancher-server的管理台中，可以看到myk8s集群已经可以被管理了，且之前运行的所有服务也都在。  
-``` javascript  
+``` bash  
 kubectl --kubeconfig=kubeconfig apply -f rancher-agents-myk8s.yml  
 ```  
 　　故障处理流程的参考链接：[https://gist.github.com/superseb/d59f26102f0a8671672f8035811b2184](https://gist.github.com/superseb/d59f26102f0a8671672f8035811b2184)  

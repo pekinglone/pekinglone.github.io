@@ -55,7 +55,7 @@ tags:
 　　
 * **配置git全局变量**  
 　　安装好git之后，在任意的文件中，点右键打开git bash命令行，在其中执行如下命令，配置本地的用户和邮箱。  
-  ``` javascript  
+  ``` bash  
   git config --global user.name "your name"  
   git config --global user.email "your@email.com"  
   ```  
@@ -64,7 +64,7 @@ tags:
 * **配置访问github的ssh-key**  
 　　在git bash命令行中执行ssh-keygen命令，并按三次回车，生成ssh key的公钥和私钥。  
 
-  ``` javascript  
+  ``` bash  
   ssh-keygen -t rsa -C "your@email.com"  
   ```  
   ![2019-02-01-16-14-17](http://img.zzl.yuandingsoft.com/blog/2019-02-01-16-14-17.png)  
@@ -77,7 +77,7 @@ tags:
 　　登录github，访问博客项目，点项目右上角的“clone or download”按钮，然后复制项目代码的地址，我的项目的地址是 [https://github.com/pekinglone/pekinglone.github.io.git](https://github.com/pekinglone/pekinglone.github.io.git) 。  
 ![2019-02-01-16-26-04](http://img.zzl.yuandingsoft.com/blog/2019-02-01-16-26-04.png)  
 　　在本地新建一个用于存放项目代码的目录，进入该目录，打开git bash，输入如下命令可以将项目代码克隆到本地一个以项目名称命名的目录中。  
-  ``` javascript  
+  ``` bash  
   git clone https://github.com/pekinglone/pekinglone.github.io.git  
   ```  
 
@@ -98,7 +98,7 @@ tags:
 * **安装DevKit**  
 　　1）DevKit是个自解压的文件，将其安装解压到某个文件夹，如E:\DevKit。  
 　　2）进入DevKit的安装目录，打开CMD命令行，执行命令初始化config.yml文件。  
-  ``` javascript  
+  ``` bash  
   # 进入安装目录  
   E:  
   cd DevKit  
@@ -115,7 +115,7 @@ tags:
 
 * **安装jekyll**  
 　　依照如下步骤安装jekyll及所需的组件，后续可以在本地的博客项目目录中，启动jekyll服务预览博客系统。默认是通过 [http://127.0.0.1:4000](http://127.0.0.1:4000) 预览的。  
-  ``` javascript  
+  ``` bash  
   # 查看gem版本  
   gem -v  
 
@@ -201,7 +201,7 @@ tags:
 ### 5.1 修改博客项目配置_config.yml  
 　　以下为_config.yml文件中需要修改的主要内容：  
 
-``` javascript  
+``` bash  
 # Site settings  
 title: Hux Blog             # 你的博客网站标题  
 SEOTitle: Hux Blog          # 网页的header  
@@ -263,7 +263,7 @@ friends: [
 
 　　以下以修改个人简介页面为例说明：  
 　　打开about.html文件，主要修改如下内容，其他各个网页修改方法与之一样。  
-```javascript  
+```bash  
 # 主要修改各个网页最上端yaml配置内容  
 ---  
 layout: page                         # 表明是网页  
@@ -284,7 +284,7 @@ multilingual: true
 　　在vscode中编写markdown格式的博文文件，文件名称最好使用英文，因为中文会进行转义，在url中不方便查看。  
 　　文件的命名格式为：YYYY-MM-DD-name.md 。年份采用四位，月份和日期均采用双位，例如：2019-01-01-my first blog。文件名中可以有空格，在url中将自动变为“-”连接符。  
 　　博文的内容为markdown格式，正常编写即可，需要主要的是博文的头部必须添加yaml格式的配置，用于定义博文的标题、小标题、作者、标签等内容，具体如下：  
-```javascript  
+```bash  
 ---  
 layout: post                          # 表明是博文  
 title: "如何搭建个人博客系统"           # 博文的标题  
