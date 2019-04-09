@@ -59,6 +59,7 @@ tags:
 ## 3.1 Jenkins的资源配置文件  
 　　在K8S中部署Jitlab，需要配置的资源为Role、Deployment、Service、PV、PVC，下面列出各个资源的yaml配置文件。该配置文件为最基础的配置，可以直接运行使用，一些高级的配置，如容器的就绪检测、存活检测、调度策略等内容可根据实际情况添加对应的配置即可。  
 * **Role**  
+
 ```Groovy  
 apiVersion: v1  
 kind: ServiceAccount  
@@ -84,6 +85,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io  
 ```  
 * **Deployment**  
+
 ```Groovy  
 apiVersion: apps/v1beta1  
 kind: Deployment  
@@ -133,6 +135,7 @@ spec:
       serviceAccount: jenkins-admin  
 ```  
 * **Service**  
+
 ```Groovy  
 apiVersion: v1  
 kind: Service  
@@ -158,6 +161,7 @@ spec:
     app: jenkins  
 ```  
 * **PV**  
+
 ```Groovy  
 apiVersion: v1  
 kind: PersistentVolume  
@@ -173,6 +177,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain  
 ```  
 * **PVC**  
+
 ```Groovy  
 apiVersion: v1  
 kind: PersistentVolumeClaim  
@@ -200,34 +205,35 @@ kubectl apply -f jenkins.yaml
 
 ## 3.3 初始化Jenkins  
 　　访问jenkins的地址，可以看到jenkins正在启动中的提示，等待启动完成，进入解锁jenkins页面，页面上会提示存有解锁密码的文件，然后进入运行jenkins的容器中查找对应的解锁密码输入即可。  
-![2019-04-02-17-06-57](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-06-57.png)
+![2019-04-02-17-06-57](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-06-57.png)  
 
 ```bash  
 # 进入jenkins容器  
 kubectl exec -it --namespace=cicd jenkins-7644854cd4-mvpvx /bin/bash  
 #在容器内查看对应文件的内容即可。  
-cat /var/jenkins_home/secrets/initialAdminPassword
+cat /var/jenkins_home/secrets/initialAdminPassword  
 
-# 或者查看容器的运行日志，也可以看到解密密码
-kubectl logs --namespace=cicd jenkins-7644854cd4-mvpvx
+# 或者查看容器的运行日志，也可以看到解密密码  
+kubectl logs --namespace=cicd jenkins-7644854cd4-mvpvx  
 #解锁密码是一串数字和字母混合的的字符串，例如：b7818539ba1642c382510214256bc87b  
 ```  
 　　解锁后，下一步选择“安装推荐的插件”，安装完成之后到达设置管理员用户的界面，可以设置一个新的管理员用户，也可以直接使用admin用户。  
-![2019-04-02-17-14-10](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-14-10.png)
-![2019-04-02-17-45-27](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-45-27.png)
+![2019-04-02-17-14-10](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-14-10.png)  
+![2019-04-02-17-45-27](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-45-27.png)  
 
 
 　　最后再确认Jenkins的登录URL（该URL后续可以在配置中修改），最终出现“Jenkins已就绪”的界面，点击“开始使用jenkins”即可正式进入jenkins。  
 
 ## 3.4 安装Jenkins插件  
 　　本环境中使用gitlab作为代码仓库，使用docker镜像，使用k8s集群，因此需要安装这三者相关的插件。如下：  
+
 序号 | 名称 | 用途  
 -----|-----|-----  
 1 | Gitlab | 配置gitlab的代码仓库。  
 2 | Gitlab hook | Gitlab的web hook，当代码仓库中代码有变化的时候，会自动触发jenkins构建任务。  
 3 | Docker plugin | 与docker集成的插件  
 4 | Docker build step | 允许使用docker命令作为构建的步骤。  
-5 | CloudBees Docker Build and Publish | 允许构建docker镜像，并发布到镜像仓库中。
+5 | CloudBees Docker Build and Publish | 允许构建docker镜像，并发布到镜像仓库中。  
 6 | Kubernetes | 配置Kubernetes集群信息，允许jenkinss通过在kubernetes运行slave pod来执行部署任务。  
 7 | kubernetes continuous deploy | 配置k8s集群的信息，允许自动在集群上发布k8s资源。  
 8 | Kubernetes Cli | 允许可在jenkins中使用kubectl命令  
@@ -246,7 +252,7 @@ kubectl logs --namespace=cicd jenkins-7644854cd4-mvpvx
 ![2019-03-22-17-20-49](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-20-49.png)  
 
 　　同时我们需要在该kubernetes中添加POD模板，即定义Jenkins Slave节点的镜像、挂载的盘等参数。  
-　　通常情况下，我们只需要定义POD模板的名称，命名空间，和标签，标签在定义执行任务的Jenkins-slave节点中会用到。下面的容器列表中我们不用配置任何的容器，采用在最后配置一个POD的yaml文件的形式来实现；当然在这里通过图形界面配置也是可以的，配置的内容和POD的yaml文件的内容是对应的。  
+　　通常情况下，我们只需要定义POD模板的名称，命名空间，和标签，标签在定义执行任务的Jenkins-slave节点中会用到。下面的容器列表中我们不用配置任何的容器，采用在最后配置一个“POD的原始yaml”的形式来实现；当然在这里通过图形界面配置也是可以的，配置的内容和“POD的原始yaml”文件的内容是对应的。  
 　　**注意**：在POD模板中配置容器模板时，容器的名称不要设置为jnlp，因为默认会启动一个名为jnlp的容器（使用的镜像是jenkins/jnlp-slave:alpine，启动时运行/usr/local/bin/jenkins-slave命令），用于和Jenkins Master进行通讯，除非你要自定义这个jnlp容器（如，使用具备jnlp功能的其他镜像）。  
 ![2019-03-22-17-49-31](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-49-31.png)  
 ![2019-03-22-17-52-39](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-52-39.png)  

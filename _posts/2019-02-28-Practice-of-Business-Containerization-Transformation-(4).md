@@ -45,6 +45,7 @@ tags:
 ## 2.1 Gitlab的资源配置文件  
 　　在K8S中部署Gitlab，需要配置的资源为Deployment、Service、PV、PVC，下面列出各个资源的yaml配置文件。该配置文件为最基础的配置，可以直接运行使用，一些高级的配置，如容器的就绪检测、存活检测、调度策略等内容可根据实际情况添加对应的配置即可。  
 * **Deployment**  
+
 ```Groovy  
 apiVersion: apps/v1beta1  
 kind: Deployment  
@@ -86,7 +87,9 @@ spec:
         persistentVolumeClaim:  
           claimName: pvc-gitlab-logs  
 ```  
+
 * **Service**  
+
 ```Groovy  
 apiVersion: v1  
 kind: Service  
@@ -116,7 +119,9 @@ spec:
   selector:  
     app: gitlab  
 ```  
+
 * **PV**  
+
 ```Groovy  
 apiVersion: v1  
 kind: PersistentVolume  
@@ -158,6 +163,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain  
 ```  
 * **PVC**  
+
 ```Groovy  
 apiVersion: v1  
 kind: PersistentVolumeClaim  
