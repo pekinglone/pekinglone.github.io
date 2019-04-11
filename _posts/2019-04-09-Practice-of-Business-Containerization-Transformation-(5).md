@@ -1,10 +1,10 @@
 ---  
 layout: post  
 title: "业务容器化改造实践（5）"  
-subtitle: 业务容器化改造的方案——在k8s中部署Jenkins持续集成工具  
+subtitle: 业务容器化改造的方案——在k8s中部署Jenkins持续集成交付平台  
 date: 2019-04-09  
 author: "张志龙"  
-header-img: "img/post-bg-cka.jpg"  
+header-img: "img/post-bg-discovery-k8s.jpg"  
 header-mask: "0.1"  
 catalog: True  
 tags:  

@@ -4,7 +4,7 @@ title: "业务容器化改造实践（4）"
 subtitle: 业务容器化改造的方案——在k8s中部署gitlab代码仓库  
 date: 2019-04-02  
 author: "张志龙"  
-header-img: "img/post-bg-cka.jpg"  
+header-img: "img/post-bg-discovery-k8s.jpg"  
 header-mask: "0.1"  
 catalog: True  
 tags:  

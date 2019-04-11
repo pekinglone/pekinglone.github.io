@@ -4,7 +4,7 @@ title: "业务容器化改造实践（3）"
 subtitle: 业务容器化改造的方案——搭建容器平台和私有镜像仓库  
 date: 2019-03-26  
 author: "张志龙"  
-header-img: "img/post-bg-cka.jpg"  
+header-img: "img/post-bg-discovery-k8s.jpg"  
 header-mask: "0.1"  
 catalog: True  
 tags:  
@@ -25,10 +25,10 @@ tags:
 
 # 一、容器平台的方案架构及规划  
 ## 1.1 容器平台的方案架构  
-　　前文讲到我们将使用Kubernetes作为容器平台，除了官方开源的kubernetes平台之外，各大公有云厂商也都推出了公有云版本的kubernetes平台，比如：阿里云的ACK（Aliyun Container Service for Kubernetes）、腾讯云的TKE（Tencent Kubernetes Engine）、华为云的CCE（Cloud Container Engine）、谷歌的GKE（Google Kubernetes Engine）、亚马逊的EKS（Amazon Elastic Container Service for Kubernetes）等。还有一批厂商推出了可私有部署的kubernetes平台或管理平台，比如：IBM的ICP（IBM Cloud Private）和Rancher公司的RKE（Rancher Kubernetes Engine）都是可以私有部署的kubernetes平台，另外Rancher公司的Rancher产品是一款kubernetes的管理平台，通过该平台我们可以在私有的物理机、虚拟机或者公有云的云主机上快速安装部署kubernetes平台，也可以直接接管公有云厂商提供的公有云版本的kubernetes集群。  
-　　无论是使用公有云的Kubernetes平台还是自建私有的Kubernetes平台，其技术架构基本上都是一样的，都是以服务器层为基础，在其上构建Kubernetes平台，利用命令行或者web界面调用其中封装好的API接口来操纵和使用Kubernetes集群。二者的区别主要是公有云厂商提供了所有的IaaS层资源，用户在其上购买云主机，一键部署kubernetes集群，然后使用，不用关心底层的实现和维护问题，同时公有云厂商提供了完善的配套工具和解决方案：如监控、日志、镜像仓库、应用商店等；而自建私有的Kubernetes平台，需要用户自己准备相关的服务器，然后在其上安装kubernetes集群，再根据需要在其上搭建配套的监控、日志、镜像仓库、应用商店等，同时用户需要自己去维护自下而上所有的系统和服务。  
-　　本次我们是利用Rancher自建私有的Kubernetes平台，最终建好的Kubernetes平台主要由四层层组成，现在自下而上对这四层进行简单的介绍：第一层为基础设施层，包含了服务器、存储、网络等基础资源，其中服务器可以是物理机，基于vmware、openStack、CloudStack的虚拟机，甚至是来自公有云的云主机。第二层是Docker层，是在服务器主机的操作系统上安装Docker，将底层的环境和资源容器化，形成可以供容器使用的计算资源、存储资源、网络资源等。第三层是Kubernetes层，利用Rancher构建Kubernetes平台，将Docker层的资源调度起来，同时可以编排容器，决定容器可以运行几个副本，在哪台主机上运行，遇到压力峰谷时自动扩缩容。最上面一层是管理层，即用户可以通过界面对整个平台进行管理，管理台中同时可以提供配套的管理工具，如：CI/CD工具、镜像仓库、应用商店、监控、日志、多租户管理等。  
-　　具体的架构图如下：  
+　　我们选择Kubernetes作为容器云管理平台，除了官方开源的kubernetes平台之外，各大公有云厂商也都推出了公有云版本的kubernetes平台，比如：阿里云的ACK（Aliyun Container Service for Kubernetes）、腾讯云的TKE（Tencent Kubernetes Engine）、华为云的CCE（Cloud Container Engine）、谷歌的GKE（Google Kubernetes Engine）、亚马逊的EKS（Amazon Elastic Container Service for Kubernetes）、微软的AKS（Azure Kubernetes Service）等。还有一批厂商推出了可私有部署的kubernetes平台或管理平台，比如：IBM的ICP（IBM Cloud Private）和Rancher公司的RKE（Rancher Kubernetes Engine）都是可以私有部署的kubernetes平台。另外Rancher公司的Rancher产品是一款kubernetes的管理平台，通过该平台我们可以在私有的物理机、虚拟机或者公有云的云主机上快速安装部署kubernetes平台，也可以直接接管公有云厂商提供的公有云版本的kubernetes集群。  
+　　无论是使用公有云的Kubernetes平台还是自建私有的Kubernetes平台，其技术架构基本上一致，都是以服务器层为基础，在其上构建Kubernetes平台，利用命令行或者web界面调用其中封装好的API接口来操纵和使用Kubernetes集群。二者的区别主要是公有云厂商提供了所有的IaaS层资源，用户在其上购买云主机，一键部署kubernetes集群，然后使用，不用关心底层的实现和维护问题，同时公有云厂商提供了完善的配套工具和解决方案：如监控、日志、镜像仓库、应用商店等；而自建私有的Kubernetes平台，需要用户自己准备相关的服务器，然后在其上安装kubernetes集群，再根据需要在其上搭建配套的监控、日志、镜像仓库、应用商店等，同时用户需要根据实际情况去维护自下而上所有的系统和服务。  
+　　本次我们是利用Rancher自建私有的Kubernetes平台，同时搭建Harbor私有镜像仓库，最终建好的Kubernetes平台主要由四层组成：第一层为基础设施层，包含了服务器、存储、网络等基础资源，其中服务器可以是物理机，基于VMware、OpenStack、CloudStack的虚拟机，甚至是来自公有云的云主机。第二层是容器基础设施层，即docker层，是在服务器主机的操作系统上安装Docker，将底层的环境和资源容器化，形成可以供容器使用的计算资源、存储资源、网络资源等。第三层应用编排和资源调度层，即Kubernetes层，利用Rancher构建Kubernetes平台，将Docker层的资源调度起来，同时可以编排容器，决定容器可以运行几个副本，在哪台主机上运行，遇到压力峰谷时自动扩缩容。最上面一层是应用管理层，即用户可以通过界面对整个平台进行管理，管理台中同时可以提供配套的管理工具，如：CI/CD工具、镜像仓库、应用商店、监控、日志、多租户管理等。  
+　　容器云管理平台的架构图如下：  
 ![2019-02-28-09-47-29](http://img.zzl.yuandingsoft.com/blog/2019-02-28-09-47-29.png)  
 
 ## 1.2 容器平台的规划  
