@@ -41,11 +41,11 @@ tags:
 
 
 # 二、Jnekins持续集成工具架构设计  
-　　Jenkins自身支持Master-Slave架构，即使用一个Jenkins作为Master服务器（节点），用于管理多个Slave服务器（节点），slave服务器的用途是执行具体的构建任务，这样的好处是将构建任务的压力分摊给多个salve节点来执行，避免master的压力过大造成的构建任务阻塞。  
-　　Jenkins支持基于kubernetes的jnlp slave，即可以在kubernetes集群中启动jnlp容器，作为salve服务器来执行构建任务，这样将带来更多的好处：  
+　　Jenkins自身支持Master-Slave架构，即使用一个Jenkins作为Master服务器（节点），用于管理多个Slave服务器（节点），Slave服务器的用途是执行具体的构建任务，这样的好处是将构建任务的压力分摊给多个Slave节点来执行，避免master的压力过大造成的构建任务阻塞。  
+　　Jenkins支持基于kubernetes的Slave，即可以在kubernetes集群中启动jnlp容器，作为Slave服务器来执行构建任务，这样将带来更多的好处：  
 * 容器化  
-　　Jenkins Slave节点是运行在kubernetes集群中的一个POD，该POD中可以有多个具体执行构建步骤的容器，容器本身的环境是标准化的，可以自己定制容器镜像，具备很强的版本控制和可移植性。同时每个构建任务具备自己的salve节点，与其他构建任务之间具备很好的隔离性。  
-* 容器slave全生命周期管理  
+　　Jenkins Slave节点是运行在kubernetes集群中的一个POD，该POD中可以有多个具体执行构建步骤的容器，容器本身的环境是标准化的，可以自己定制容器镜像，具备很强的版本控制和可移植性。同时每个构建任务具备自己的Slave节点，与其他构建任务之间具备很好的隔离性。  
+* Slave容器全生命周期管理  
 　　当构建任务触发时，将会自动在kubernetes集群中创建用于本次构建的Slave节点，并自动在其中执行构建任务，当构建任务结束时（无论是成功或失败）将自动销毁该Slave节点，并释放资源。  
 * 高并发  
 　　当有多个构建任务同时触发时，将会在Kubernetes集群中创建多个用于执行构建任务的Slave节点。　　
@@ -257,6 +257,6 @@ kubectl logs --namespace=cicd jenkins-7644854cd4-mvpvx
 ![2019-03-22-17-49-31](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-49-31.png)  
 ![2019-03-22-17-52-39](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-52-39.png)  
 
-　　经过上述的配置，基于Kubernetes的jenkins slave就配置好了，后续我们在创建CI/CD流水线的时候，通过配置即可让构建任务运行在jenkins salve节点上，而非jenkins master节点。下一篇文章中将会讲解如何在构建任务中使用Jenkins Slave来执行构建任务。  
+　　经过上述的配置，基于Kubernetes的jenkins slave就配置好了，后续我们在创建CI/CD流水线的时候，通过配置即可让构建任务运行在jenkins slave节点上，而非jenkins master节点。下一篇文章中将会讲解如何在构建任务中使用Jenkins Slave来执行构建任务。  
 
 >　　结语：我们已经在kubernetes集群中安装部署了jenkins，并实现了jenkins数据的持续化，同时配置jenkins slave，jenkins的基础平台已经搭建完毕。后续我们将继利用jenkins和gitlab开始构建CI/CD自动化流水线。  

@@ -225,10 +225,6 @@ kubectl apply -f gitlab.yaml
 ![2019-02-28-11-32-07](http://img.zzl.yuandingsoft.com/blog/2019-02-28-11-32-07.png)  
 
 
-### 2.3.3 配置Jenkins连接Gitlab的Token  
-　　后续jenkins配置与gitlab的连接时，需要用到gitlab中的token，因此在这里建立token并记录下来【**一定要记录下来，因为创建之后关掉页面就再也看不到token的值了**】。  
-　　使用与Jenkins交互用的普通用户登录系统，进行配置，配置的路径是：在页面右上角点击用户图标→“settings”→“Access Token”，之后填写token的名称，勾选“API”，然后创建token，最后记录生成的token。  
-![2019-02-28-11-34-02](http://img.zzl.yuandingsoft.com/blog/2019-02-28-11-34-02.png)  
 
 # 2.4 创建项目，并同步代码  
 　　使用普通用户登录后，可根据需要先创建项目组，再在组内创建项目，并设置可用级别。同时将本地的项目与gitlab的项目关联起来，可以将本地项目代码推送到gitlab中即可。  
