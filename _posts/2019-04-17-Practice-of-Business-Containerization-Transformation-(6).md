@@ -42,10 +42,9 @@ tags:
 # 二、CI/CD流水线的实现  
 ## 2.1 手工发布过程  
 　　针对常见的项目，在容器中部署运行，但不借用CI/CD流水线，采用纯人工执行的方式进行发布部署，通常会涉及三类角色：开发人员、运维人员、测试人员。  
-　　开人人员需要做的是编写代码、提交到代码仓库，代码完成之后，进行编译、测试形成软件制品（如jar包、可执行程序等），甚至是直接形成软件的docker镜像。  
+　　开发人员需要做的是编写代码、提交到代码仓库，代码完成之后，进行编译、测试形成软件制品（如jar包、可执行程序等），甚至是直接形成软件的docker镜像。  
 　　运维人员需要做的是制作软件的docker镜像（也可能是开发人员制作的），编写部署的配置文件，首先执行部署测试系统。当测试通过之后，可以上线，再部署或升级生产系统。  
 　　测试系统部署完毕之后，测试人员对软件功能进行测试，测试通过之后，将结果反馈给项目组进行上线决策。  
-　　
 　　假设，针对一个java项目（helloworld），我们可以将发布过程所做的步骤归纳如下：  
 **1.提交代码、制作镜像所需的Dockerfile，以及部署到k8s集群中的YAML配置模板。**  
 　　可能是开发人员提交代码，运维人员提交Dockerfile和YAML模板。  
@@ -147,7 +146,7 @@ spec:
 ```  
 　　修改YAML配置模板，并执行部署，部署成功后，可以通过“http://k8s-node-ip:32180/helloWorld”访问到。  
 ```bash  
-# 替换YAML模板中的变量，下例是使用sed命令将文件中的 "TAG_ID" 替换为环境变量中BUILD_ID的值 "${BUILD_ID}"。  
+# 替换YAML模板中的变量，下例是使用sed命令将文件中的 "TAG_ID" 替换为环境变量中的值 "${BUILD_ID}"。  
 sed -i s/"TAG_ID"/"${BUILD_ID}"/g Template.yaml  
 
 # 在可访问k8s集群的命令行中执行部署  
@@ -198,7 +197,7 @@ kubectl apply -f Template.yaml
 
 *  **配置构建步骤--部署到k8s集群**  
 　　其中部署到k8s集群步骤，会根据代码仓库中带的Template.yaml配置模板，首先替换变量，然后再执行部署。  
-　　替换变量执行的是shell命令，使用sed命令替换YAML模板中的变量，本模板中只有一个变量（BUILD_ID）需要替换为实际的值（${BUILD_ID}，该值为Jenkins的内置变量，是本次构建任务的次数），形成可最终部署的配置文件。  
+　　替换变量执行的是shell命令，使用sed命令替换YAML模板中的变量，本模板中只有一个变量（TAG_ID）需要替换为实际的值（${BUILD_ID}，该值为Jenkins的内置变量，是本次构建任务的次数），形成可最终部署的配置文件。  
 ![2019-04-03-11-32-41](http://img.zzl.yuandingsoft.com/blog/2019-04-03-11-32-41.png)  
 　　要执行部署应用到k8s集群中，有多中方式，比如：远程到对应的k8s集群节点上执行kubectl命令部署（对应插件是 Publish Over SSH），本地配置kubeconfig文件作为客户端执行kubectl命令来部署，或者使用kubernetes continuous deploy插件来部署。  
 　　下图是使用kubernetes continuous deploy插件来部署的配置，首先需要配置kubeconfig凭据，点Add在弹出的添加凭据页面可以添加，类型选择“kubernetes Configuration”，kubeconfig配置有三种方法：1.直接将kubeconfig文件（k8s集群的kubecofnig文件默认是k8s集群主节点操作系统的~/.kube/config 文件）的内容填写进来；2.选择Jenkins Master上的文件，需要事先把kubeconfig文件拷贝到Jenkins Master节点上；3.选择Kubernetes集群主节点上的kubeconfig文件。  
@@ -232,7 +231,7 @@ kubectl apply -f Template.yaml
 ![2019-04-09-16-29-59](http://img.zzl.yuandingsoft.com/blog/2019-04-09-16-29-59.png)  
 
 *  **Jenkinsfile的编写**  
-　　以上为在Jenkins中配置“流水线（Pipeline）”任务的方法，这种方法需要用到定义任务执行步骤的Jenkinsfile，Jenkinsfile是的语法是基于Groovy语言的，分为脚本式和声明式两种脚本，我们用到的是声明式的脚本，其中定义了执行任务的Jenkins-slave节点的配置，以及执行构建任务的具体步骤和执行每个步骤所用的Jenkins-slave节点。具体的Jenkinsfile写法可以参考[官方文档]()。  
+　　以上为在Jenkins中配置“流水线（Pipeline）”任务的方法，这种方法需要用到定义任务执行步骤的Jenkinsfile，Jenkinsfile是的语法是基于Groovy语言的，分为脚本式和声明式两种脚本，我们用到的是声明式的脚本，其中定义了执行任务的Jenkins-slave节点的配置，以及执行构建任务的具体步骤和执行每个步骤所用的Jenkins-slave节点。具体的Jenkinsfile写法可以参考[官方文档](https://jenkins.io/doc/book/pipeline/)。  
 　　下面是本次构建过程中用到的Jenkinsfile文件的内容，其中的agent就是要执行构建任务的Jenkins-slave节点，stages是需要执行的构建步骤。需要注意的是agent需要事先在Jenkins的系统管理中进行配置，详情参考[业务容器化改造的方案——在k8s中部署Jenkins持续集成工具](http://www.chilone.tk/2019/04/09/Practice-of-Business-Containerization-Transformation-(5)/)：  
 
 ```groovy  
