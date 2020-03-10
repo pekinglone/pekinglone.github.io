@@ -42,18 +42,18 @@ tags:
 　　按照注册要求，填写对应的用户名、密码、邮箱等信息，并通过邮箱激活注册即可，具体的注册过程略。  
 　　注册好github帐号之后，访问公开的博客项目，这里我推荐使用黄玄的模板（[https://github.com/Huxpro/huxpro.github.io](https://github.com/Huxpro/huxpro.github.io)），里边集成了很多实用的功能，比如自定义域名、侧边栏、标签、评论等。我们只需对配置文件中的内容进行简单修改就可以使用了。  
 　　访问到该博客项目后，点击右上角的“fork”按钮，将自动将项目代码fork到自己的github代码仓库中。  
-![2019-02-01-15-23-48](http://img.zzl.yuandingsoft.com/blog/2019-02-01-15-23-48.png)  
+![2019-02-01-15-23-48](http://img.chilone.cn/blog/2019-02-01-15-23-48.png)  
 　　
 　　然后进入fork过来的项目，点击“settings”，修改项目的名称。名称的格式是　**_username_**.github.io  。注意这里的username是登录之后显示的名字，不是登录的用户名。之后等待几分钟，github将会自动创建好博客系统，并且可以通过https://**_username_**.github.io 来访问。  
 　　例如我的博客的访问地址就是：[https://pekinglone.github.io/](https://pekinglone.github.io/)  
-![2019-02-01-15-28-05](http://img.zzl.yuandingsoft.com/blog/2019-02-01-15-28-05.png)  
+![2019-02-01-15-28-05](http://img.chilone.cn/blog/2019-02-01-15-28-05.png)  
 
 # 二、本地安装git工具并clone项目到本地  
 　　项目代码是在github中，我们需要下载到本地进行修改，同时我们编写的博客文章也是需要上传到github上的，因此在本地需要安装git工具。  
 　　首先需要从git的官方网站下载git：[https://git-scm.com/](https://git-scm.com/)  
 * **执行安装**  
 　　然后，在执行默认安装，最终可以在任意的文件夹中点击右键然后可以打开git的命令行即可。本地安装好git工具，后续可以在vscode中使用git。  
-![install-git](http://img.zzl.yuandingsoft.com/blog/install-git.gif)  
+![install-git](http://img.chilone.cn/blog/install-git.gif)  
 　　
 * **配置git全局变量**  
 　　安装好git之后，在任意的文件中，点右键打开git bash命令行，在其中执行如下命令，配置本地的用户和邮箱。  
@@ -61,7 +61,7 @@ tags:
   git config --global user.name "your name"  
   git config --global user.email "your@email.com"  
   ```  
-  ![2019-02-01-16-09-07](http://img.zzl.yuandingsoft.com/blog/2019-02-01-16-09-07.png)  
+  ![2019-02-01-16-09-07](http://img.chilone.cn/blog/2019-02-01-16-09-07.png)  
 
 * **配置访问github的ssh-key**  
 　　在git bash命令行中执行ssh-keygen命令，并按三次回车，生成ssh key的公钥和私钥。  
@@ -69,15 +69,15 @@ tags:
   ``` bash  
   ssh-keygen -t rsa -C "your@email.com"  
   ```  
-  ![2019-02-01-16-14-17](http://img.zzl.yuandingsoft.com/blog/2019-02-01-16-14-17.png)  
+  ![2019-02-01-16-14-17](http://img.chilone.cn/blog/2019-02-01-16-14-17.png)  
 　　生成的密钥放在 C:/user/_username_/.ssh/ 目录中，其中id_rsa是私钥，id_rsa.pub是公钥，现在需要把公钥配置到github中。  
 　　用记事本打开id_rsa.pub文件，复制其中的内容，后续要粘贴到github中创建的ssh key中。  
 　　登录github，点击右上角的用户图标，之后点“settings”→“SSH and GPG keys”，然后新建一个ssh key，填写一个名称，在key中填写id_rsa.pub文件的内容（该文件内容是以ssh-rsa开头），最后输入密码确定。  
-![2019-02-01-16-21-43](http://img.zzl.yuandingsoft.com/blog/2019-02-01-16-21-43.png)  
+![2019-02-01-16-21-43](http://img.chilone.cn/blog/2019-02-01-16-21-43.png)  
 
 * **克隆项目代码到本地**  
 　　登录github，访问博客项目，点项目右上角的“clone or download”按钮，然后复制项目代码的地址，我的项目的地址是 [https://github.com/pekinglone/pekinglone.github.io.git](https://github.com/pekinglone/pekinglone.github.io.git) 。  
-![2019-02-01-16-26-04](http://img.zzl.yuandingsoft.com/blog/2019-02-01-16-26-04.png)  
+![2019-02-01-16-26-04](http://img.chilone.cn/blog/2019-02-01-16-26-04.png)  
 　　在本地新建一个用于存放项目代码的目录，进入该目录，打开git bash，输入如下命令可以将项目代码克隆到本地一个以项目名称命名的目录中。  
   ``` bash  
   git clone https://github.com/pekinglone/pekinglone.github.io.git  
@@ -95,7 +95,7 @@ tags:
 
 * **安装Ruby**  
 　　安装ruby时需要注意的两个问题是，一个是安装路径中不能有空格，最好安装到根目录中，如E:\Ruby23-x64，一个是要勾选添加PATH环境变量的选项。  
-![install-ruby](http://img.zzl.yuandingsoft.com/blog/install-ruby.gif)  
+![install-ruby](http://img.chilone.cn/blog/install-ruby.gif)  
 
 * **安装DevKit**  
 　　1）DevKit是个自解压的文件，将其安装解压到某个文件夹，如E:\DevKit。  
@@ -145,7 +145,7 @@ tags:
 * **安装vscode**  
 　　从微软官网上下载vscode工具：[https://code.visualstudio.com/](https://code.visualstudio.com/)  
 　　执行安装  
-![install-vscode](http://img.zzl.yuandingsoft.com/blog/install-vscode.gif)  
+![install-vscode](http://img.chilone.cn/blog/install-vscode.gif)  
 * **配置插件**  
 　　所需安装的插件如下：  
 
@@ -162,7 +162,7 @@ tags:
     Chinese (Simplified) Language Pack for Visual Studio Code|vscode的简体中文包，安装后界面是中文。  
   
   　　各插件的安装方式一样，点击左侧的“扩展”→搜索插件名称→“安装”。个别插件需要配置，后面会说明，其他插件可以直接使用。  
-![2019-02-01-17-54-59](http://img.zzl.yuandingsoft.com/blog/2019-02-01-17-54-59.png)  
+![2019-02-01-17-54-59](http://img.chilone.cn/blog/2019-02-01-17-54-59.png)  
 
 * **配置七牛云图床**  
 　　本次安装了两个七牛云的插件，一个支持直接粘贴图片，一个支持上传本地的图片，两个插件配置的内容基本相同。需要注册七牛云的帐号，并在其中获取所需的配置。  
@@ -195,7 +195,7 @@ tags:
 ```  
 　　最新版本的vscode可在“文件”→“首选项”→“设置”中搜索 qiniu ，然后按照要求填写需要的七牛云配置信息。  
 　　以下为一个配置的示例：  
-![2019-02-10-19-05-47](http://img.zzl.yuandingsoft.com/blog/2019-02-10-19-05-47.png)  
+![2019-02-10-19-05-47](http://img.chilone.cn/blog/2019-02-10-19-05-47.png)  
 
 # 五、修改博客项目配置并预览效果  
 　　克隆到本地的博客项目需要修改配置，修改为自己的才能使用。主要修改的内容有：修改_config.yml文件的配置，修改一些网页的说明，删除原作者的博客和相关的图片等内容。  

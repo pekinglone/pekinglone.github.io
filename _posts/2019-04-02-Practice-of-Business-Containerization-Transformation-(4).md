@@ -26,7 +26,7 @@ tags:
 
 # 一、CI/CD流水线的方案架构  
 　　我们对业务进行了微服务化拆分，并以容器的形式在Kubernetes集群中运行，那么必须有一套合适的自动CI/CD发布流水线来实现业务的持续集成和持续发布，以满足快速的业务上线和迭代，同时降低管理的成本。下面是我们设计的CI/CD流水线的方案架构图。  
-![2019-02-28-10-02-15](http://img.zzl.yuandingsoft.com/blog/2019-02-28-10-02-15.png)  
+![2019-02-28-10-02-15](http://img.chilone.cn/blog/2019-02-28-10-02-15.png)  
 　　从图中可以看到，涉及的组件主要有四个：gitlab代码仓库、Jenkins集成工具、Harbor私有镜像仓库、Kubernetes集群。其中Kubernetes集群和Harbor私有镜像仓库等基础平台在“业务容器化改造的方案——搭建容器平台和私有镜像仓库”一文中进行了详细的介绍，从本篇文章开始将会介绍gitlab和Jenkins的搭建过程，以及CI/CD流水线的构建过程，本篇主要介绍如何在Kubernetes集群中部署gitlab代码仓库。  
 　　本方案中的CI/CD流水线的原理流程如下：  
 1. 开发人员编写好程序代码，通过git提交到本地的代码仓库，提交时，需要包含后续打包成镜像的Dockerfile，以及部署到Kubernetes集群中的YAML资源配置模板。  
@@ -222,7 +222,7 @@ kubectl apply -f gitlab.yaml
 ### 2.3.2 允许本地网络的webhook  
 　　使用**管理员用户**登录系统，修改系统的配置，允许针对本地网络进行webhook，只需配置一次，后续所有的项目都可以使用。  
 　　配置的路径是：“admin area”→“Settings”→“network”→“outbound Requests”，勾选允许针对本地网络使用webhook。  
-![2019-02-28-11-32-07](http://img.zzl.yuandingsoft.com/blog/2019-02-28-11-32-07.png)  
+![2019-02-28-11-32-07](http://img.chilone.cn/blog/2019-02-28-11-32-07.png)  
 
 
 

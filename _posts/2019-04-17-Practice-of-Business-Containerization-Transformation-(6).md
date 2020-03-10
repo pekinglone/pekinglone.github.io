@@ -25,7 +25,7 @@ tags:
 
 # 一、CI/CD流水线的方案架构回顾  
 　　我们对业务进行了微服务化拆分，并以容器的形式在Kubernetes集群中运行，那么必须有一套合适的自动CI/CD发布流水线来实现业务的持续集成和持续发布，以满足快速的业务上线和迭代，同时降低管理的成本。下面是我们设计的CI/CD流水线的方案架构图。  
-![2019-02-28-10-02-15](http://img.zzl.yuandingsoft.com/blog/2019-02-28-10-02-15.png)  
+![2019-02-28-10-02-15](http://img.chilone.cn/blog/2019-02-28-10-02-15.png)  
 　　从图中可以看到，涉及的组件主要有四个：gitlab代码仓库、Jenkins集成工具、Harbor私有镜像仓库、Kubernetes集群。所有的组件的部署方式在前文均已进行了详细的描述，本篇主要介绍如何利用Jenkins和Gitlab构建自动化的发布流水线。  
 　　本方案中的CI/CD流水线的原理流程如下：  
 1. 开发人员编写好程序代码，通过git提交到本地的代码仓库，提交时，需要包含后续打包成镜像的Dockerfile，以及部署到Kubernetes集群中的YAML资源配置模板。  
@@ -159,31 +159,31 @@ kubectl apply -f Template.yaml
 
 ### 2.2.1 自由风格的软件项目（freestyle）  
 　　“自由风格的软件项目”可以通过图形界面配置所有的步骤，包含配置代码仓库源、触发器、环境、构建（Build）。如下图所示，在Build部分可以添加需要执行的步骤，比如执行shell命令、将文件发送到远程机器或到远程机器上执行shell命令、执行docker命令、构建docker镜像、部署到kubernetes等等，可以添加的步骤类型与安装的插件有关，最常见的一些步骤都已经具备，添加之后按照要求填写补充完成步骤内容即可。如下图中是添加了一个“执行shell”的步骤，可以将所需执行的shell命令写入。  
-![2019-04-01-10-33-12](http://img.zzl.yuandingsoft.com/blog/2019-04-01-10-33-12.png)  
+![2019-04-01-10-33-12](http://img.chilone.cn/blog/2019-04-01-10-33-12.png)  
 
 　　对于上述的手工发布过程中所执行的所有的命令，可以按照手工执行的步骤，将各个阶段的操作在任务（Job）中配置完成。除了本地提交代码的步骤是手工执行的之外，其他几个步骤均可以在jenkins的任务中进行配置。下面介绍各个步骤的配置方法。  
 
 *  **新建任务，选择Jenkins-slave**  
 　　新建一个任务（Job），类型选择“自由风格的软件项目”，在“General”中可以配置执行任务的jenkins-slave节点的标签，例如上篇文章中配置的jenkins-slave-pod标签，这样将在kubernetes集群中启动一对应的pod来执行jenkins的构建任务。  
 　　需要注意的是，这里选择的Jenkins-slave可以启动，并且执行构建任务，但是只会在jenkins-slave默认的容器（jnlp）中执行，可能会出现构建步骤中用到的命令找不到的问题，此时需要使用针对本任务专门定制的jnlp镜像，以保证所有的构建步骤均可以成功。  
-![2019-04-02-14-07-43](http://img.zzl.yuandingsoft.com/blog/2019-04-02-14-07-43.png)  
+![2019-04-02-14-07-43](http://img.chilone.cn/blog/2019-04-02-14-07-43.png)  
 
 *  **配置项目源代码**  
 　　在“Source Code Management”中，可以配置代码仓库的源地址，在执行构建的时候首先从该地址拉取所有的源代码。其中“Repository URL”填写仓库的地址，“Credentials”选择登陆代码仓库的凭据。  
 　　如果登录gitlab的凭据还没有设置，可以点“Add”，在跳出的“添加凭据”页面添加，类型选择“用户名和密码”，然后填写用户名和密码，并设置ID和描述方便后续识别使用。  
-![2019-04-02-14-08-12](http://img.zzl.yuandingsoft.com/blog/2019-04-02-14-08-12.png)  
-![2019-04-03-09-35-25](http://img.zzl.yuandingsoft.com/blog/2019-04-03-09-35-25.png)  
+![2019-04-02-14-08-12](http://img.chilone.cn/blog/2019-04-02-14-08-12.png)  
+![2019-04-03-09-35-25](http://img.chilone.cn/blog/2019-04-03-09-35-25.png)  
 
 *  **配置任务触发器**  
 　　在“Build Triggers”中配置触发该构建任务的条件，可以配置为定时构建（轮询SCM也是定时构建），或者配置为自动触发构建。配置为Gitlab自动触发构建时，需要安装gitlab webhook插件，并需要将此处的 URL 配置到gitlab项目中的webhook中（gitlab中设置的路径为 进入项目→“设置”→“集成”，然后填写url，添加webhook，测试成功返回HTTP200即可）。  
-![2019-04-03-09-20-58](http://img.zzl.yuandingsoft.com/blog/2019-04-03-09-20-58.png)  
+![2019-04-03-09-20-58](http://img.chilone.cn/blog/2019-04-03-09-20-58.png)  
 
 *  **配置构建步骤--编译代码**  
 　　在“Build”中添加任务执行所需的步骤，主要是三步：编译代码、制作镜像、部署到k8s集群。  
 　　其中编译代码步骤，需要使用到的是maven编译，即执行mvn package命令进行编译，需要配置maven工具。配置路径为“系统管理”→“全局工具配置”→“Maven”→“Add Maven”，填写maven工具的名称，如maven-3.6.0，选择自动安装（不选的话，需要手工去安装），选择“从Apache安装”。后续使用到maven的时候会自动在执行任务的节点上安装maven。  
 　　编译步骤中选择“调用顶层Maven目标”，其中Maven的版本选择全局工具配置中配置的maven，即 maven-3.6.0，目标（Goals）中填写要执行的命令，如果要执行“mvn package”就填写“package”。具体如下图所示：  
-![2019-04-03-10-27-53](http://img.zzl.yuandingsoft.com/blog/2019-04-03-10-27-53.png)  
-![2019-04-03-10-31-50](http://img.zzl.yuandingsoft.com/blog/2019-04-03-10-31-50.png)  
+![2019-04-03-10-27-53](http://img.chilone.cn/blog/2019-04-03-10-27-53.png)  
+![2019-04-03-10-31-50](http://img.chilone.cn/blog/2019-04-03-10-31-50.png)  
 
 *  **配置构建步骤--构建镜像**  
 　　其中制作镜像步骤，会根据源代码中带的Dockerfile制作docker镜像，并可以将制作好的镜像上传到私有的镜像仓库中，因此我们需要使用“Docker Build and Publish”（对应的插件是CloudBees Docker Build and Publish）。  
@@ -193,17 +193,17 @@ kubectl apply -f Template.yaml
 　　**Docker Host URI**：执行构建docker镜像的主机，如果是本机（执行构建任务的节点上有docker）执行，可以使用unix:///var/run/docker.sock ；如果是需要发送到远程的具备docker环境的主机上执行，则需要填写对方的IP地址和端口，通常是： tcp://ip:2376 ，需要对应的docker主机开放允许远程来执行镜像构建，这样具备一定的风险。  
 　　**Docker Registry URL**：私有镜像仓库的地址，比如：http://harbor.yuandingit.com 。  
 　　**Registry Credentials**：登录私有镜像仓库的凭据，即用户名和密码，点 ADD 可在jenkins中配置。  
-![2019-04-03-11-30-03](http://img.zzl.yuandingsoft.com/blog/2019-04-03-11-30-03.png)  
+![2019-04-03-11-30-03](http://img.chilone.cn/blog/2019-04-03-11-30-03.png)  
 
 *  **配置构建步骤--部署到k8s集群**  
 　　其中部署到k8s集群步骤，会根据代码仓库中带的Template.yaml配置模板，首先替换变量，然后再执行部署。  
 　　替换变量执行的是shell命令，使用sed命令替换YAML模板中的变量，本模板中只有一个变量（TAG_ID）需要替换为实际的值（${BUILD_ID}，该值为Jenkins的内置变量，是本次构建任务的次数），形成可最终部署的配置文件。  
-![2019-04-03-11-32-41](http://img.zzl.yuandingsoft.com/blog/2019-04-03-11-32-41.png)  
+![2019-04-03-11-32-41](http://img.chilone.cn/blog/2019-04-03-11-32-41.png)  
 　　要执行部署应用到k8s集群中，有多中方式，比如：远程到对应的k8s集群节点上执行kubectl命令部署（对应插件是 Publish Over SSH），本地配置kubeconfig文件作为客户端执行kubectl命令来部署，或者使用kubernetes continuous deploy插件来部署。  
 　　下图是使用kubernetes continuous deploy插件来部署的配置，首先需要配置kubeconfig凭据，点Add在弹出的添加凭据页面可以添加，类型选择“kubernetes Configuration”，kubeconfig配置有三种方法：1.直接将kubeconfig文件（k8s集群的kubecofnig文件默认是k8s集群主节点操作系统的~/.kube/config 文件）的内容填写进来；2.选择Jenkins Master上的文件，需要事先把kubeconfig文件拷贝到Jenkins Master节点上；3.选择Kubernetes集群主节点上的kubeconfig文件。  
 　　然后是配置需要执行部署的yaml配置文件，这里填写的是源代码中的相对路径，如：Template.yaml是放在源代码的根目录下，所以直接填写Template.yaml 。  
-![2019-04-03-11-32-27](http://img.zzl.yuandingsoft.com/blog/2019-04-03-11-32-27.png)  
-![2019-04-03-11-42-12](http://img.zzl.yuandingsoft.com/blog/2019-04-03-11-42-12.png)  
+![2019-04-03-11-32-27](http://img.chilone.cn/blog/2019-04-03-11-32-27.png)  
+![2019-04-03-11-42-12](http://img.chilone.cn/blog/2019-04-03-11-42-12.png)  
 
 　　配置完成之后，在任务中点击“立即构建”可以进行测试，同时可以观察任务执行时的详细日志，如果有报错则构建任务将会中止，在日志中可以看出报错的步骤及原因；如果没有报错，则将会按照既定的步骤在k8s集群中部署hellworld的应用，同时可以通过网页“http://k8s-node-ip:32180/helloWorld”访问到。  
 
@@ -215,7 +215,7 @@ kubectl apply -f Template.yaml
 
 *  **配置任务触发器**  
 　　在“Build Triggers”中配置触发该构建任务的条件，可以配置为定时构建（轮询SCM也是定时构建），或者配置为自动触发构建。配置为Gitlab自动触发构建时，需要安装gitlab webhook插件，并需要将此处的 URL 配置到gitlab项目中的webhook中（gitlab中设置的路径为 进入项目→“设置”→“集成”，然后填写url，添加webhook，测试成功返回HTTP200即可）。  
-![2019-04-09-15-59-48](http://img.zzl.yuandingsoft.com/blog/2019-04-09-15-59-48.png)  
+![2019-04-09-15-59-48](http://img.chilone.cn/blog/2019-04-09-15-59-48.png)  
 
 *  **配置流水线**  
 　　在“Pipeline”中配置本任务的流水线，因为流水线的配置文件Jenkinsfile文件是放在代码仓库中的，因此这里需要配置代码仓库的地址，并选择相应的Jenkinsfile配置文件。  
@@ -226,9 +226,9 @@ kubectl apply -f Template.yaml
 　　**Credentials**：访问代码仓库的凭据，即登录代码仓库的用户名和密码。  
 　　**Branch to Build**：Git代码仓库的分支，即构建时拉取代码的分支，默认是“Master”。  
 　　**Script Path**：流水线脚本的路径，即Jenkinsfile的路径，该路径是相对于源代码的根目录的，假设配置文件名称为Jenkinsfile，且在源代码的最顶层，那么此处可以直接填写Jenkinsfile即可。  
-![2019-04-09-16-01-54](http://img.zzl.yuandingsoft.com/blog/2019-04-09-16-01-54.png)  
+![2019-04-09-16-01-54](http://img.chilone.cn/blog/2019-04-09-16-01-54.png)  
 　　**Pipeline Syntax**： Pipeline脚本的语法及代码片段生成器，如果不会写Jenkinsfile的具体内容，可以通过代码生成器将图形界面的配置生成代码片段，再将代码片段写入Jenkinsfile中即可。如下图，选择一个需要执行的步骤，比如“部署到K8S集群”，然后填写k8s集群的kubeconfig配置和最终要执行部署的Template.yaml配置文件，点击“Generate Pipeline Script”即可生成相关的代码片段。  
-![2019-04-09-16-29-59](http://img.zzl.yuandingsoft.com/blog/2019-04-09-16-29-59.png)  
+![2019-04-09-16-29-59](http://img.chilone.cn/blog/2019-04-09-16-29-59.png)  
 
 *  **Jenkinsfile的编写**  
 　　以上为在Jenkins中配置“流水线（Pipeline）”任务的方法，这种方法需要用到定义任务执行步骤的Jenkinsfile，Jenkinsfile是的语法是基于Groovy语言的，分为脚本式和声明式两种脚本，我们用到的是声明式的脚本，其中定义了执行任务的Jenkins-slave节点的配置，以及执行构建任务的具体步骤和执行每个步骤所用的Jenkins-slave节点。具体的Jenkinsfile写法可以参考[官方文档](https://jenkins.io/doc/book/pipeline/)。  

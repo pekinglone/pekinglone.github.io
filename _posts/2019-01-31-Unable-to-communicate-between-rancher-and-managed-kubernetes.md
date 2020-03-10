@@ -26,7 +26,7 @@ tags:
 # 故障现象  
 
 　　针对Rancher-server所在的服务器的docker-ce版本进行了升级，从17.03升级到了18.06，升级之后Rancher-server的容器启动也正常，但是在Rancher-server的管理台页面看到所管理的myk8s集群无法连接了，一直处于“Provisioning”状态，下方提示等待agent连接，无法通过Rancher server的web页面管理myk8s集群。  
-![2019-02-01-09-45-36](http://img.zzl.yuandingsoft.com/blog/2019-02-01-09-45-36.png)  
+![2019-02-01-09-45-36](http://img.chilone.cn/blog/2019-02-01-09-45-36.png)  
 　　查询Rancher-server容器的日志，发现有大量的提示TLS握手错误，原因是认证证书有问题，导致Rancher-server和Rancher-agent进行通讯，因此Rancher-server无法通过安装在k8s集群中的Rancher-agent对k8s集群进行管理了。  
 ``` bash  
 2019/01/23 10:00:49 [INFO] 2019/01/23 10:00:49 http: TLS handshake error from 192.168.51.201:56744: remote error: tls: bad certificate  
@@ -38,7 +38,7 @@ tags:
 　　因此导致故障的原因可能有两个，一个是docker版本的升级，一个是没有正常启停容器和docker服务。  
 　　通过直接重启Rancher-server所在服务器上的docker服务进行验证，发现Rancher-server容器重启后运行正常，可以正常管理k8s集群。因此可以排除没有正常启停容器和docker服务这个原因。  
 　　在Rancher的官方网站上查找到运行rancher的环境要求，发现官方推荐在centos上运行rancher的docker版本是docker-ce 17.03.2。而我将docker的版本升级到了18.09，可能不是最佳的运行版本，对rancher的支持有问题，才导致这个问题的出现。  
-![2019-02-01-10-25-20](http://img.zzl.yuandingsoft.com/blog/2019-02-01-10-25-20.png)  
+![2019-02-01-10-25-20](http://img.chilone.cn/blog/2019-02-01-10-25-20.png)  
 　　同样在kubernetes官方，其推荐的docker版本也是docker-ce17.03.2，因此我们在安装使用rancher及kubernetes的时候，一定要到官方查看推荐的最佳运行环境，以避免出现各种问题。  
 # 故障处理  
 　　要想恢复Rancher-server管理对应k8s集群的功能，必须让Rancher-server和Rancher-agent能够正常通讯才行，只要按照最初的配置重新部署一次Rancher-agent即可恢复正常的管理。  

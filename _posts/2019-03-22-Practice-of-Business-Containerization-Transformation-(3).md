@@ -29,7 +29,7 @@ tags:
 　　无论是使用公有云的Kubernetes平台还是自建私有的Kubernetes平台，其技术架构基本上一致，都是以服务器层为基础，在其上构建Kubernetes平台，利用命令行或者web界面调用其中封装好的API接口来操纵和使用Kubernetes集群。二者的区别主要是公有云厂商提供了所有的IaaS层资源，用户在其上购买云主机，一键部署kubernetes集群，然后使用，不用关心底层的实现和维护问题，同时公有云厂商提供了完善的配套工具和解决方案：如监控、日志、镜像仓库、应用商店等；而自建私有的Kubernetes平台，需要用户自己准备相关的服务器，然后在其上安装kubernetes集群，再根据需要在其上搭建配套的监控、日志、镜像仓库、应用商店等，同时用户需要根据实际情况去维护自下而上所有的系统和服务。  
 　　本次我们是利用Rancher自建私有的Kubernetes平台，同时搭建Harbor私有镜像仓库，最终建好的Kubernetes平台主要由四层组成：第一层为基础设施层，包含了服务器、存储、网络等基础资源，其中服务器可以是物理机，基于VMware、OpenStack、CloudStack的虚拟机，甚至是来自公有云的云主机。第二层是容器基础设施层，即docker层，是在服务器主机的操作系统上安装Docker，将底层的环境和资源容器化，形成可以供容器使用的计算资源、存储资源、网络资源等。第三层应用编排和资源调度层，即Kubernetes层，利用Rancher构建Kubernetes平台，将Docker层的资源调度起来，同时可以编排容器，决定容器可以运行几个副本，在哪台主机上运行，遇到压力峰谷时自动扩缩容。最上面一层是应用管理层，即用户可以通过界面对整个平台进行管理，管理台中同时可以提供配套的管理工具，如：CI/CD工具、镜像仓库、应用商店、监控、日志、多租户管理等。  
 　　容器云管理平台的架构图如下：  
-![2019-02-28-09-47-29](http://img.zzl.yuandingsoft.com/blog/2019-02-28-09-47-29.png)  
+![2019-02-28-09-47-29](http://img.chilone.cn/blog/2019-02-28-09-47-29.png)  
 
 ## 1.2 容器平台的规划  
 　　首先明确一下我们需要搭建的内容：一套Kubernetes平台、一套私有镜像仓库、一套CI/CD工具、一套代码仓库。其中CI/CD工具和代码仓库可以直接在kubernetes平台中运行，因此不必单独搭建。为了方便管理镜像，同时搭建kubernetes平台的时候就已经用到很多镜像，所以私有的镜像仓库可以独立部署。利用Rancher搭建Kubernetes平台的时候，Rancher管理台自身可以作为一个单独的容器来运行，也可以先用Rancher的RKE搭建一套Kunernetes集群，在集群中运行高可用的Rancher管理台，为了方便，我们采用单独容器的形式来运行Rancher管理台。  
@@ -136,7 +136,7 @@ systemctl start docker && systemctl enable docker
 ```  
 
 　　此时使用docker时，可能会存在下载镜像慢的问题，可以注册一个阿里云的帐号，免费开通“容器镜像服务”，并根据其中的说明将镜像加速器配置到本地的docker中。  
-![2019-03-19-18-01-55](http://img.zzl.yuandingsoft.com/blog/2019-03-19-18-01-55.png)  
+![2019-03-19-18-01-55](http://img.chilone.cn/blog/2019-03-19-18-01-55.png)  
 　　例如，我这里用到的镜像加速器地址是：https://supz5x7p.mirror.aliyuncs.com，可以用如下的方法添加到本地docker中：  
 ```bash  
 # 新建docker的daemon.json文件,并将加速器配置到文件中  
@@ -171,7 +171,7 @@ rancher/rancher:v2.1.6
 
 ## 4.2 创建Kubernetes集群  
 　　进入“global”→选择“add cluster”→选择“from my own existing nodes ： custom”→填写集群名称“myk8s”→“下一步”。  
-![2019-03-19-19-03-13](http://img.zzl.yuandingsoft.com/blog/2019-03-19-19-03-13.png)  
+![2019-03-19-19-03-13](http://img.chilone.cn/blog/2019-03-19-19-03-13.png)  
  
 　　定制各个节点的角色，各个节点的角色规划如下：  
 

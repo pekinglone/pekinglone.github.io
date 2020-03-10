@@ -26,7 +26,7 @@ tags:
 
 # 一、CI/CD流水线的方案架构回顾  
 　　我们对业务进行了微服务化拆分，并以容器的形式在Kubernetes集群中运行，那么必须有一套合适的自动CI/CD发布流水线来实现业务的持续集成和持续发布，以满足快速的业务上线和迭代，同时降低管理的成本。下面是我们设计的CI/CD流水线的方案架构图。  
-![2019-02-28-10-02-15](http://img.zzl.yuandingsoft.com/blog/2019-02-28-10-02-15.png)  
+![2019-02-28-10-02-15](http://img.chilone.cn/blog/2019-02-28-10-02-15.png)  
 　　从图中可以看到，涉及的组件主要有四个：gitlab代码仓库、Jenkins集成工具、Harbor私有镜像仓库、Kubernetes集群。其中Kubernetes集群和Harbor私有镜像仓库等基础平台在“业务容器化改造的方案——搭建容器平台和私有镜像仓库”一文中进行了详细的介绍，gitlab私有代码仓库在“业务容器化改造的方案——在k8s中部署gitlab代码仓库”一文中进行了详细的介绍，本篇主要介绍如何在Kubernetes集群中部署Jenkins CI/CD工具。  
 　　本方案中的CI/CD流水线的原理流程如下：  
 1. 开发人员编写好程序代码，通过git提交到本地的代码仓库，提交时，需要包含后续打包成镜像的Dockerfile，以及部署到Kubernetes集群中的YAML资源配置模板。  
@@ -205,7 +205,7 @@ kubectl apply -f jenkins.yaml
 
 ## 3.3 初始化Jenkins  
 　　访问jenkins的地址，可以看到jenkins正在启动中的提示，等待启动完成，进入解锁jenkins页面，页面上会提示存有解锁密码的文件，然后进入运行jenkins的容器中查找对应的解锁密码输入即可。  
-![2019-04-02-17-06-57](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-06-57.png)  
+![2019-04-02-17-06-57](http://img.chilone.cn/blog/2019-04-02-17-06-57.png)  
 
 ```bash  
 # 进入jenkins容器  
@@ -218,8 +218,8 @@ kubectl logs --namespace=cicd jenkins-7644854cd4-mvpvx
 #解锁密码是一串数字和字母混合的的字符串，例如：b7818539ba1642c382510214256bc87b  
 ```  
 　　解锁后，下一步选择“安装推荐的插件”，安装完成之后到达设置管理员用户的界面，可以设置一个新的管理员用户，也可以直接使用admin用户。  
-![2019-04-02-17-14-10](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-14-10.png)  
-![2019-04-02-17-45-27](http://img.zzl.yuandingsoft.com/blog/2019-04-02-17-45-27.png)  
+![2019-04-02-17-14-10](http://img.chilone.cn/blog/2019-04-02-17-14-10.png)  
+![2019-04-02-17-45-27](http://img.chilone.cn/blog/2019-04-02-17-45-27.png)  
 
 
 　　最后再确认Jenkins的登录URL（该URL后续可以在配置中修改），最终出现“Jenkins已就绪”的界面，点击“开始使用jenkins”即可正式进入jenkins。  
@@ -249,13 +249,13 @@ kubectl logs --namespace=cicd jenkins-7644854cd4-mvpvx
 　　**Kubernetes地址**：配置的是Kubernetes集群的地址，因为我们这里的Jenkins是部署在Kubernetes集群中的，且这里添加的Kubernetes集群也是同一个，因此我们可以直接配置集群的地址，而不用配置任何证书和凭据。地址可以配置为：https://kubernetes.default （集群内部地址） 或者  https://192.168.51.200:6443 （集群外部地址）。需要注意的是，如果要添加其他的集群，则需要配置为对应集群的地址，并配置一个PKCS格式的凭据。具体方法后面会讲到。  
 　　**Jenkins地址**：配置的是Jenkins Master服务器的地址，即jenkins自身的访问地址，用于Jenkins Slave与Master进行通讯，因为我们这里的Jenkins是部署在Kubernetes集群中的，且这里添加的Kubernetes集群也是同一个，因此我们可以配置为： http://jenkins.cicd.svc.default.local:8080 （集群内部地址） 或者 http://192.168.51.200:32080 （集群外部地址）。  
 　　**容器数量**：这个值表示允许Kubernetes运行的最大并发运行代理程序容器数。如果设置为空，则表示没有限制。设置为0表示不启动任何容器。  
-![2019-03-22-17-20-49](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-20-49.png)  
+![2019-03-22-17-20-49](http://img.chilone.cn/blog/2019-03-22-17-20-49.png)  
 
 　　同时我们需要在该kubernetes中添加POD模板，即定义Jenkins Slave节点的镜像、挂载的盘等参数。  
 　　通常情况下，我们只需要定义POD模板的名称，命名空间，和标签，标签在定义执行任务的Jenkins-slave节点中会用到。下面的容器列表中我们不用配置任何的容器，采用在最后配置一个“POD的原始yaml”的形式来实现；当然在这里通过图形界面配置也是可以的，配置的内容和“POD的原始yaml”文件的内容是对应的。  
 　　**注意**：在POD模板中配置容器模板时，容器的名称不要设置为jnlp，因为默认会启动一个名为jnlp的容器（使用的镜像是jenkins/jnlp-slave:alpine，启动时运行/usr/local/bin/jenkins-slave命令），用于和Jenkins Master进行通讯，除非你要自定义这个jnlp容器（如，使用具备jnlp功能的其他镜像）。  
-![2019-03-22-17-49-31](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-49-31.png)  
-![2019-03-22-17-52-39](http://img.zzl.yuandingsoft.com/blog/2019-03-22-17-52-39.png)  
+![2019-03-22-17-49-31](http://img.chilone.cn/blog/2019-03-22-17-49-31.png)  
+![2019-03-22-17-52-39](http://img.chilone.cn/blog/2019-03-22-17-52-39.png)  
 
 　　经过上述的配置，基于Kubernetes的jenkins slave就配置好了，后续我们在创建CI/CD流水线的时候，通过配置即可让构建任务运行在jenkins slave节点上，而非jenkins master节点。下一篇文章中将会讲解如何在构建任务中使用Jenkins Slave来执行构建任务。  
 
