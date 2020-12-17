@@ -103,8 +103,11 @@ page-mathjax: false
 # Friends
 friends: [
     {
-         title: "元鼎科技",
-         href: "http://blog.yuandingit.com/"
+         title: "Rancher Labs",
+         href: "https://www.rancher.cn/"
+    },{
+         title: "SUSE",
+         href: "https://www.suse.com/"
     },{
          title: "MY CSDN BLOG",
          href: "https://blog.csdn.net/u014186673"
